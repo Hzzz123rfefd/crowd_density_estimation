@@ -1,0 +1,34 @@
+# config.yml
+
+model_type:
+  mcnn
+# mdoel args
+model:        
+  device: cuda   
+
+# trainning args
+traininng:
+  batch_size: 2               
+  epochs: 1000          
+  learning_rate: 0.0001   
+  optimizer: Adam              
+  weight_decay: 0.0001
+  clip_max_norm: 0.5
+  factor: 0.3
+  patience: 15         
+  device: cuda
+
+dataset_type:
+  mcnn
+dataset:
+  train_image_folder: imgs/ShanghaiTech/part_B/train_data/images
+  test_image_folder: imgs/ShanghaiTech/part_B/test_data/images
+  valid_image_folder: imgs/ShanghaiTech/part_B/test_data/images
+  train_label_folder: imgs/ShanghaiTech/part_B/train_data/ground-truth
+  test_label_folder: imgs/ShanghaiTech/part_B/test_data/ground-truth
+  valid_label_folder: imgs/ShanghaiTech/part_B/test_data/ground-truth
+
+
+logging:
+  log_interval: 100             
+  save_dir: "./saved_model/eticn"   
