@@ -55,13 +55,11 @@ class MCNN(nn.Module):
         output["label"] = input["label"].to(self.device)
         return output
     
-    def load_pretrained(self, save_model_dir, lamda = None):
-        lamda = self.lamda if lamda == None else lamda
-        self.load_state_dict(torch.load(save_model_dir + "/" + str(lamda) + "/model.pth"))
+    def load_pretrained(self, save_model_dir):
+        self.load_state_dict(torch.load(save_model_dir  + "/model.pth"))
     
-    def save_pretrained(self,  save_model_dir, lamda = None):
-        lamda = self.lamda if lamda == None else lamda
-        torch.save(self.state_dict(), save_model_dir + "/" + str(lamda) + "/model.pth")
+    def save_pretrained(self,  save_model_dir):
+        torch.save(self.state_dict(), save_model_dir + "/model.pth")
 
     def trainning(
             self,
@@ -87,7 +85,7 @@ class MCNN(nn.Module):
                 If there is  training history record, load pretrain parameters
             """
             if  os.path.isdir(save_model_dir) and os.path.exists(check_point_path) and os.path.exists(log_path):
-                self.load_pretrained(save_model_dir,self.finetune_model_lamda)  
+                self.load_pretrained(save_model_dir)  
                 first_trainning = False
 
             else:
@@ -192,6 +190,7 @@ class MCNN(nn.Module):
             """ calculate loss """
             out_criterion = self.compute_loss(output)
             out_criterion["total_loss"].backward()
+            total_loss.update(out_criterion["total_loss"].item())
 
             """ grad clip """
             if clip_max_norm > 0:
@@ -201,7 +200,7 @@ class MCNN(nn.Module):
             optimizer.step()
             after_used_memory = 0 if self.device != "cuda" else torch.cuda.memory_allocated(torch.cuda.current_device()) / (1024 ** 3) 
             postfix_str = "total_loss: {:.4f},use_memory: {:.1f}G".format(
-                total_loss.avg, 
+                math.sqrt(total_loss.avg), 
                 after_used_memory - used_memory
             )
             pbar.set_postfix_str(postfix_str)
@@ -225,9 +224,24 @@ class MCNN(nn.Module):
 
             str = "Test Epoch: {:d}, total_loss: {:.4f}".format(
                 epoch,
-                total_loss.avg
+                math.sqrt(total_loss.avg)
             )
         print(str)
         with open(trainning_log_path, "a") as file:
             file.write(str+"\n")
         return total_loss.avg
+    
+    def get_density(self,image):
+        image = image.unsqueeze(0)
+        image = image.to(self.device)
+        self = self.to(self.device)
+        image = image.contiguous()/255
+        self.eval()
+        with torch.no_grad():
+            x1 = self.branch1(image)
+            x2 = self.branch2(image)
+            x3 = self.branch3(image)
+            x = torch.cat((x1,x2,x3),1)
+            density = self.fuse(x)
+        density = density.cpu().squeeze(0)
+        return density
