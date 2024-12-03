@@ -56,7 +56,7 @@ class MCNN(nn.Module):
         return output
     
     def load_pretrained(self, save_model_dir):
-        self.load_state_dict(torch.load(save_model_dir  + "/model.pth"))
+        self.load_state_dict(torch.load(save_model_dir  + "/model.pth",map_location=torch.device(self.device)))
     
     def save_pretrained(self,  save_model_dir):
         torch.save(self.state_dict(), save_model_dir + "/model.pth")
@@ -168,9 +168,8 @@ class MCNN(nn.Module):
     def compute_loss(self, input):
         output = {}
         mse_loss = nn.MSELoss()
-
-        """ reconstruction loss """
-        output["total_loss"] = mse_loss(input["predict"], input["label"])
+        mse = (input["predict"] - input["label"])**2
+        output["total_loss"] = (input["predict"]**5 *  mse).mean()
         return output
 
     def train_one_epoch(self, epoch, train_dataloader, optimizer, clip_max_norm, log_path = None):

@@ -23,7 +23,17 @@ def main(args):
 
     density = net.get_density(image)
     density = density.squeeze(0).numpy()
+
+    flattened_density = density.flatten()
+    plt.figure(figsize=(8, 6))
+    plt.hist(flattened_density, bins=50, color='blue', edgecolor='black', alpha=0.7)
+    plt.xlabel('Density Value')
+    plt.ylabel('Frequency')
+    plt.title('Histogram of Density Values')
+    plt.show()
+
     plt.imshow(density, cmap='jet', interpolation='nearest')
+
 
     # 添加颜色条（color bar）
     plt.colorbar()

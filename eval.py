@@ -37,7 +37,22 @@ def generate_density_map(mat_file_path, scale = 4, kernel_size = 16, sigma = 3):
 
 def main(args):
     density = generate_density_map(args.mat_file_path)
-    
+    print(density.sum())
+    # 将二维密度图展平为一维数组
+    flattened_density = density.flatten()
+
+    # 绘制直方图
+    plt.figure(figsize=(8, 6))
+    plt.hist(flattened_density, bins=200, color='blue', edgecolor='black', alpha=0.7)
+
+    # 添加标签和标题
+    plt.xlabel('Density Value')
+    plt.ylabel('Frequency')
+    plt.title('Histogram of Density Values')
+
+    # 显示图形
+    plt.show()
+
     plt.imshow(density, cmap='jet', interpolation='nearest')
 
     # 添加颜色条（color bar）
