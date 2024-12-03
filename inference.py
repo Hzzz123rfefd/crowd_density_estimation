@@ -49,7 +49,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--image_path',type=str, default= "imgs/ShanghaiTech/part_B/train_data/images/IMG_15.jpg")
+    parser.add_argument('--image_path',type=str, default= "imgs/ShanghaiTech/part_B/train_data/images/IMG_1.jpg")
     parser.add_argument('--model_cof',type=str, default="cof/eticn.yml")
     parser.add_argument('--output_path',type=str, default="ret.png")
     args = parser.parse_args()
