@@ -84,7 +84,7 @@ class DatasetForDensity(DatasetForImageReader):
         self.label = np.array(label_data)
 
 
-    def generate_density_map(self,mat_file_path, scale = 4, kernel_size = 16, sigma = 3):
+    def generate_density_map(self,mat_file_path, scale = 4, kernel_size = 64, sigma = 8):
         mat = scipy.io.loadmat(mat_file_path)
         
         # 提取点标注数据 (x, y)
@@ -106,7 +106,7 @@ class DatasetForDensity(DatasetForImageReader):
         kernel = gaussian_kernel(kernel_size, sigma)
         gaussian_density_map = convolve(scale_density_map, kernel, mode='reflect')
 
-        return gaussian_density_map
+        return gaussian_density_map * 100
     
     def __len__(self):
         return self.total_samples

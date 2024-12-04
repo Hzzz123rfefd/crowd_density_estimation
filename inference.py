@@ -25,8 +25,9 @@ def main(args):
     density = density.squeeze(0).numpy()
 
     flattened_density = density.flatten()
+    print(density.sum())
     plt.figure(figsize=(8, 6))
-    plt.hist(flattened_density, bins=50, color='blue', edgecolor='black', alpha=0.7)
+    plt.hist(flattened_density, bins=200, color='blue', edgecolor='black', alpha=0.7)
     plt.xlabel('Density Value')
     plt.ylabel('Frequency')
     plt.title('Histogram of Density Values')
@@ -49,7 +50,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--image_path',type=str, default= "imgs/ShanghaiTech/part_B/train_data/images/IMG_1.jpg")
+    parser.add_argument('--image_path',type=str, default= "imgs/ShanghaiTech/part_B/train_data/images/IMG_15.jpg")
     parser.add_argument('--model_cof',type=str, default="cof/eticn.yml")
     parser.add_argument('--output_path',type=str, default="ret.png")
     args = parser.parse_args()

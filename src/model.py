@@ -1,3 +1,4 @@
+from matplotlib import pyplot as plt
 import torch
 import torch.nn as nn
 import math
@@ -42,6 +43,7 @@ class MCNN(nn.Module):
                                      Conv2d(24, 12, 3, same_padding=True, bn=bn)).to(self.device)
         
         self.fuse = nn.Sequential(Conv2d( 30, 1, 1, same_padding=True, bn=bn)).to(self.device)
+        self.relu = nn.Sigmoid()
         
     def forward(self, input):
         output = {}
@@ -51,6 +53,8 @@ class MCNN(nn.Module):
         x3 = self.branch3(image)
         x = torch.cat((x1,x2,x3),1)
         x = self.fuse(x)
+        # x = self.relu(x)
+        x = x.squeeze(1)
         output["predict"] = x
         output["label"] = input["label"].to(self.device)
         return output
@@ -168,8 +172,14 @@ class MCNN(nn.Module):
     def compute_loss(self, input):
         output = {}
         mse_loss = nn.MSELoss()
-        mse = (input["predict"] - input["label"])**2
-        output["total_loss"] = (input["predict"]**5 *  mse).mean()
+        # density =  input["label"][0,:,:].cpu().numpy()
+        # plt.imshow(density, cmap='jet', interpolation='nearest')        
+        # plt.colorbar()
+        # plt.title("Density Map Heatmap (Blue to Red)")
+        # plt.savefig('train.png', dpi=300, bbox_inches='tight')
+        # plt.close()
+    
+        output["total_loss"] = mse_loss(input["predict"], input["label"])
         return output
 
     def train_one_epoch(self, epoch, train_dataloader, optimizer, clip_max_norm, log_path = None):
@@ -242,5 +252,7 @@ class MCNN(nn.Module):
             x3 = self.branch3(image)
             x = torch.cat((x1,x2,x3),1)
             density = self.fuse(x)
+            # density = self.relu(density)
+            # density = torch.clamp(density,0,1)
         density = density.cpu().squeeze(0)
         return density
