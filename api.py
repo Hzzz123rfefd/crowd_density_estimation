@@ -6,7 +6,7 @@ import time
 start_time = time.time()
 api_url = "http://127.0.0.1:8000/predict/"
 
-with open("imgs/ShanghaiTech/part_B/test_data/images/IMG_1.jpg", "rb") as img_file:
+with open("a/output_0001.png", "rb") as img_file:
     files = {"file": img_file}
     response = requests.post(api_url, files=files)
 

@@ -20,18 +20,19 @@ def main(args):
     # load image
     image = cv2.imread(args.image_path)
     image = torch.tensor(image).permute(2, 0, 1).float()
-
+    print(image)
     density = net.get_density(image)
     density = density.squeeze(0).numpy()
+    print(density)
 
     flattened_density = density.flatten()
     print(density.sum())
     plt.figure(figsize=(8, 6))
-    plt.hist(flattened_density, bins=200, color='blue', edgecolor='black', alpha=0.7)
-    plt.xlabel('Density Value')
-    plt.ylabel('Frequency')
-    plt.title('Histogram of Density Values')
-    plt.show()
+    # plt.hist(flattened_density, bins=200, color='blue', edgecolor='black', alpha=0.7)
+    # plt.xlabel('Density Value')
+    # plt.ylabel('Frequency')
+    # plt.title('Histogram of Density Values')
+    # plt.show()
 
     plt.imshow(density, cmap='jet', interpolation='nearest')
 
