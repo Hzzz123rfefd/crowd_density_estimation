@@ -1,10 +1,8 @@
 from torch.utils.data import DataLoader
 from src import models,datasets
-from utils import *
+from src.utils import *
 
 import argparse
-import yaml
-
 
 
 def main(args):

@@ -1,4 +1,3 @@
-from matplotlib import pyplot as plt
 import torch
 import torch.nn as nn
 import math
@@ -12,14 +11,17 @@ from torch.utils.data import DataLoader
 from src.utils import *
 
 class MCNN(nn.Module):
-    '''
-    Multi-column CNN 
-        -Implementation of Single Image Crowd Counting via Multi-column CNN (Zhang et al.)
-    '''
-    
-    def __init__(self, device = "cuda",bn=False):
+    def __init__(
+        self, 
+        target_height = None,
+        target_width = None,
+        device = "cuda",
+        bn = False
+    ):
         super(MCNN, self).__init__()
-
+        self.target_height = target_height
+        self.target_width = target_width
+        self.bn = bn
         self.device = device if torch.cuda.is_available() else "cpu"
         self.branch1 = nn.Sequential(Conv2d( 3, 16, 9, same_padding=True, bn=bn),
                                      nn.MaxPool2d(2),
@@ -45,7 +47,7 @@ class MCNN(nn.Module):
         self.fuse = nn.Sequential(Conv2d( 30, 1, 1, same_padding=True, bn=bn)).to(self.device)
         self.relu = nn.Sigmoid()
         
-    def forward(self, input):
+    def forward(self, input, is_train = True):
         output = {}
         image = input["image"].to(self.device)
         x1 = self.branch1(image)
@@ -53,10 +55,10 @@ class MCNN(nn.Module):
         x3 = self.branch3(image)
         x = torch.cat((x1,x2,x3),1)
         x = self.fuse(x)
-        # x = self.relu(x)
         x = x.squeeze(1)
         output["predict"] = x
-        output["label"] = input["label"].to(self.device)
+        if is_train:
+            output["label"] = input["label"].to(self.device)
         return output
     
     def load_pretrained(self, save_model_dir):
@@ -240,19 +242,28 @@ class MCNN(nn.Module):
             file.write(str+"\n")
         return total_loss.avg
     
-    def get_density(self,image):
-        image = image.unsqueeze(0)
-        image = image.to(self.device)
-        self = self.to(self.device)
-        image = image.contiguous()/255
+    def inference(self, image_path = None, image_data = None):
         self.eval()
+        image,original_width,original_height = read_image(
+            image_path = image_path,
+            image_data = image_data,
+            target_height = self.target_height,
+            target_width = self.target_width,
+            normalize = True
+        )
+        image = torch.tensor(image).permute(2, 0, 1).float().unsqueeze(0).to(self.device)
         with torch.no_grad():
-            x1 = self.branch1(image)
-            x2 = self.branch2(image)
-            x3 = self.branch3(image)
-            x = torch.cat((x1,x2,x3),1)
-            density = self.fuse(x)
-            # density = self.relu(density)
-            # density = torch.clamp(density,0,1)
-        density = density.cpu().squeeze(0)
+            output = self.forward(
+                input = {
+                    "image": image
+                },
+                is_train = False 
+            )
+            density = output["predict"]
+        density = density.cpu().squeeze(0).numpy()
+        density = cv2.resize(density, (original_width, original_height))
+        density = cv2.normalize(density, None, 0, 255, cv2.NORM_MINMAX)
+        density = cv2.applyColorMap(density.astype(np.uint8), cv2.COLORMAP_JET)
+        density = density.astype(np.uint8)
         return density
+

@@ -14,13 +14,10 @@ image_folder = "./stream"
 image_files = sorted([f for f in os.listdir(image_folder) if f.endswith('.png') or f.endswith('.jpg')])
 
 st.title("实时人群密度检测模拟系统v1.0")
-
-
 start_button = st.button("开始模拟")
 
 if start_button:
     video_placeholder = st.empty()
-
     for i, frame_file in enumerate(image_files):
         frame_path = os.path.join(image_folder, frame_file)
         start_time = time.time()

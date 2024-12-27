@@ -1,6 +1,13 @@
+import cv2
 from torch.utils.data.dataloader import default_collate
 import numpy as np
 import torch.nn as nn
+import yaml
+
+def load_config(config_path):
+    with open(config_path, 'r') as file:
+        config = yaml.safe_load(file)
+    return config
 
 class Conv2d(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, relu=True, same_padding=False, bn=False):
@@ -18,7 +25,6 @@ class Conv2d(nn.Module):
         if self.relu is not None:
             x = self.relu(x)
         return x
-
 
 def recursive_collate_fn(batch):
     if isinstance(batch[0], dict):
@@ -43,7 +49,6 @@ def clip_gradient(optimizer, grad_clip):
             if param.grad is not None:
                 param.grad.data.clamp_(-grad_clip, grad_clip)
 
-
 class AverageMeter:
     def __init__(self):
         self.val = 0
@@ -56,3 +61,23 @@ class AverageMeter:
         self.sum += val * n
         self.count += n
         self.avg = self.sum / self.count
+        
+def read_image(
+    image_path = None, 
+    image_data = None,
+    target_height = None, 
+    target_width = None, 
+    normalize = False,
+):
+    if image_path != None:
+        image = cv2.imread(image_path)
+    else:
+        image = image_data
+    assert image is not None ,"image data is None"
+    original_width = image.shape[1]
+    original_height = image.shape[0]
+    if target_height != None:
+        image = cv2.resize(image, (target_width, target_height))
+    if normalize:
+        image = image / 255.0
+    return image,original_width,original_height

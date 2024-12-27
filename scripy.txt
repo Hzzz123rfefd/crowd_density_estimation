@@ -1,5 +1,0 @@
-ffmpeg -i input1.mp4 -vf "fps=15,scale=1024:768" -t 100 a/output_%04d.png 
-
-uvicorn deploy:app --reload
-
-streamlit run app.py
