@@ -39,12 +39,16 @@ python example/inference.py --image_path {yout image path} --model_config_path c
 ### start your model service
 Once you have trained your model, you can deploy your model as a web service:
 ```bash
-python example/deploy.py  --model_config_path config/density.yml --host "127.0.0.1" --port "8000"
+python example/deploy.py  --model_cof config/density.yml --host "127.0.0.1" --port "8000"
 ```
 ### Start your monitoring app
 After deploying your model web service, you can run your app:
 ```bash
-streamlit run app.py
+streamlit run example/app.py
+```
+You can use the following script to convert your video into image frames and place them in the folder stream for the system to simulate real-time detection
+```bash
+ffmpeg -i input.flv -vf "fps=15,scale=1024:768" -t 10 stream/output_%04d.png
 ```
 
 ## Related links

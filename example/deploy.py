@@ -1,11 +1,13 @@
 import argparse
 import base64
+import os
+import sys
 from fastapi import FastAPI, File, UploadFile
-import torch
 import numpy as np
 from fastapi.responses import JSONResponse
 import cv2
 import uvicorn
+sys.path.append(os.getcwd())
 
 from src.utils import *
 from src import *
@@ -39,7 +41,7 @@ def main(args):
     config = load_config(args.model_cof)
     model = models[config["model_type"]](**config["model"])
     model.load_pretrained(config["logging"]["save_dir"])  
-    uvicorn.run(app, host = args.host, port = args.port, reload=True)
+    uvicorn.run(app, host = args.host, port = args.port, reload = False)
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
